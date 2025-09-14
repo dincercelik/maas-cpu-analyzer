@@ -1,0 +1,16 @@
+# Include files
+include CONTRIBUTING.md
+include LICENSE
+include README.md
+include requirements.txt
+include setup.cfg
+include setup.py
+include pyproject.toml
+
+# Exclude files
+recursive-exclude * __pycache__
+recursive-exclude * *.egg-info
+recursive-exclude * *.py[co]
+recursive-exclude * .DS_Store
+recursive-exclude * .git*
+recursive-exclude * .venv*
