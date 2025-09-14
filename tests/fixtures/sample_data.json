@@ -1,0 +1,110 @@
+{
+  "maas_machines": [
+    {
+      "hostname": "compute-node-01",
+      "status_name": "Deployed",
+      "zone": {
+        "name": "zone-1"
+      },
+      "hardware_info": {
+        "cpu_model": "Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz"
+      },
+      "tag_names": [
+        "compute",
+        "gpu"
+      ]
+    },
+    {
+      "hostname": "compute-node-02",
+      "status_name": "Deployed",
+      "zone": {
+        "name": "zone-1"
+      },
+      "hardware_info": {
+        "cpu_model": "AMD EPYC 7551P 32-Core Processor"
+      },
+      "tag_names": [
+        "compute"
+      ]
+    },
+    {
+      "hostname": "storage-node-01",
+      "status_name": "Ready",
+      "zone": {
+        "name": "zone-2"
+      },
+      "hardware_info": {
+        "cpu_model": "Intel(R) Core(TM) i7-8700K CPU @ 3.70GHz"
+      },
+      "tag_names": [
+        "storage"
+      ]
+    },
+    {
+      "hostname": "unknown-node-01",
+      "status_name": "Deployed",
+      "zone": {
+        "name": "zone-1"
+      },
+      "hardware_info": {
+        "cpu_model": "Unknown CPU Model"
+      },
+      "tag_names": []
+    }
+  ],
+  "openstack_hypervisors": [
+    {
+      "hypervisor_hostname": "compute-node-01",
+      "name": "compute-node-01",
+      "id": 1,
+      "state": "up",
+      "status": "enabled"
+    },
+    {
+      "hypervisor_hostname": "compute-node-02",
+      "name": "compute-node-02",
+      "id": 2,
+      "state": "up",
+      "status": "enabled"
+    }
+  ],
+  "resource_providers": [
+    {
+      "uuid": "12345678-1234-1234-1234-123456789abc",
+      "name": "compute-node-01",
+      "generation": 1
+    },
+    {
+      "uuid": "87654321-4321-4321-4321-cba987654321",
+      "name": "compute-node-02",
+      "generation": 1
+    }
+  ],
+  "traits": [
+    "CUSTOM_INTEL_XEON_E5_2680_V4_2_40GHZ",
+    "CUSTOM_AMD_EPYC_7551P_32_CORE_PROCESSOR",
+    "CUSTOM_INTEL_CORE_I7_8700K_3_70GHZ"
+  ],
+  "service_catalog": {
+    "catalog": [
+      {
+        "name": "placement",
+        "endpoints": [
+          {
+            "interface": "public",
+            "url": "http://test-openstack:8778"
+          }
+        ]
+      },
+      {
+        "name": "nova",
+        "endpoints": [
+          {
+            "interface": "public",
+            "url": "http://test-openstack:8774"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,89 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maas-cpu-analyzer"
+version = "1.0.0"
+description = "A Python tool to analyze CPU models in MAAS machines and optionally create OpenStack traits for resource scheduling"
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "Dincer Celik", email = "hello@dincercelik.com"}
+]
+maintainers = [
+    {name = "Dincer Celik", email = "hello@dincercelik.com"}
+]
+keywords = ["maas", "openstack", "cpu", "traits", "hardware", "analysis"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: System :: Systems Administration",
+    "Topic :: System :: Hardware",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "cliff>=4.0.0,<5.0.0",
+    "openstacksdk>=1.5.0,<2.0.0",
+    "osc-placement>=1.0.0,<2.0.0",
+    "prettytable>=3.0.0,<4.0.0",
+    "requests>=2.31.0,<3.0.0",
+    "requests-oauthlib>=1.3.1,<2.0.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-xdist>=3.0.0",
+    "responses>=0.23.0",
+    "freezegun>=1.2.0",
+    "coverage>=7.0.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-xdist>=3.0.0",
+    "responses>=0.23.0",
+    "freezegun>=1.2.0",
+    "coverage>=7.0.0",
+    "flake8>=6.0.0",
+    "flake8-docstrings>=1.7.0",
+    "flake8-import-order>=0.18.0",
+    "flake8-bugbear>=23.0.0",
+    "flake8-comprehensions>=3.14.0",
+    "mypy>=1.5.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "bandit>=1.7.0",
+    "safety>=2.3.0",
+]
+docs = [
+    "sphinx>=6.0.0",
+    "sphinx-rtd-theme>=1.2.0",
+    "myst-parser>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/dincercelik/maas-cpu-analyzer"
+Repository = "https://github.com/dincercelik/maas-cpu-analyzer"
+Issues = "https://github.com/dincercelik/maas-cpu-analyzer/issues"
+Documentation = "https://github.com/dincercelik/maas-cpu-analyzer#readme"
+
+[project.scripts]
+maas-cpu-analyzer = "maas_cpu_analyzer:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["maas_cpu_analyzer*"]
+exclude = ["tests*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.txt", "*.md", "*.cfg"]
