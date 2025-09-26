@@ -18,12 +18,14 @@ class TestMAASAPI:
         """Test successful MAAS data fetching."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch("requests.Session") as mock_session_class:
+        with patch(
+            "maas_cpu_analyzer.maas_client.requests.Session"
+        ) as mock_session_class:
             mock_session = Mock()
             mock_session_class.return_value = mock_session
             mock_session.get.return_value = mock_maas_response
 
-            result = analyzer.fetch_maas_data()
+            result = analyzer.maas_client.fetch_maas_data()
 
             assert result == mock_maas_response.json.return_value
             mock_session.get.assert_called_once()
@@ -34,7 +36,7 @@ class TestMAASAPI:
 
         with patch.dict("os.environ", {"MAAS_API_KEY": "test:key:secret"}, clear=True):
             with pytest.raises(SystemExit):
-                analyzer.fetch_maas_data()
+                analyzer.maas_client.fetch_maas_data()
 
             captured = capsys.readouterr()
             assert (
@@ -50,7 +52,7 @@ class TestMAASAPI:
             "os.environ", {"MAAS_URL": "http://test:5240/MAAS"}, clear=True
         ):
             with pytest.raises(SystemExit):
-                analyzer.fetch_maas_data()
+                analyzer.maas_client.fetch_maas_data()
 
             captured = capsys.readouterr()
             assert (
@@ -68,7 +70,7 @@ class TestMAASAPI:
             clear=True,
         ):
             with pytest.raises(SystemExit):
-                analyzer.fetch_maas_data()
+                analyzer.maas_client.fetch_maas_data()
 
             captured = capsys.readouterr()
             assert "MAAS_API_KEY must be in format" in captured.err
@@ -77,7 +79,9 @@ class TestMAASAPI:
         """Test MAAS data fetching with HTTP error."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch("requests.Session") as mock_session_class:
+        with patch(
+            "maas_cpu_analyzer.maas_client.requests.Session"
+        ) as mock_session_class:
             mock_session = Mock()
             mock_session_class.return_value = mock_session
 
@@ -92,7 +96,7 @@ class TestMAASAPI:
             mock_session.get.return_value = mock_response
 
             with pytest.raises(SystemExit):
-                analyzer.fetch_maas_data()
+                analyzer.maas_client.fetch_maas_data()
 
             captured = capsys.readouterr()
             assert "Failed to fetch MAAS data" in captured.err
@@ -103,7 +107,9 @@ class TestMAASAPI:
         """Test MAAS data fetching with JSON decode error."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch("requests.Session") as mock_session_class:
+        with patch(
+            "maas_cpu_analyzer.maas_client.requests.Session"
+        ) as mock_session_class:
             mock_session = Mock()
             mock_session_class.return_value = mock_session
 
@@ -116,7 +122,7 @@ class TestMAASAPI:
             mock_session.get.return_value = mock_response
 
             with pytest.raises(SystemExit):
-                analyzer.fetch_maas_data()
+                analyzer.maas_client.fetch_maas_data()
 
             captured = capsys.readouterr()
             assert "Failed to parse MAAS JSON data" in captured.err
@@ -125,7 +131,9 @@ class TestMAASAPI:
         """Test OAuth configuration for MAAS API."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch("requests.Session") as mock_session_class:
+        with patch(
+            "maas_cpu_analyzer.maas_client.requests.Session"
+        ) as mock_session_class:
             mock_session = Mock()
             mock_session_class.return_value = mock_session
 
@@ -136,7 +144,7 @@ class TestMAASAPI:
             mock_response.raise_for_status.return_value = None
             mock_session.get.return_value = mock_response
 
-            analyzer.fetch_maas_data()
+            analyzer.maas_client.fetch_maas_data()
 
             # Verify OAuth1 was called with correct parameters
             mock_session.get.assert_called_once()
@@ -148,7 +156,9 @@ class TestMAASAPI:
         """Test MAAS API URL construction."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch("requests.Session") as mock_session_class:
+        with patch(
+            "maas_cpu_analyzer.maas_client.requests.Session"
+        ) as mock_session_class:
             mock_session = Mock()
             mock_session_class.return_value = mock_session
 
@@ -159,7 +169,7 @@ class TestMAASAPI:
             mock_response.raise_for_status.return_value = None
             mock_session.get.return_value = mock_response
 
-            analyzer.fetch_maas_data()
+            analyzer.maas_client.fetch_maas_data()
 
             # Verify the API URL was constructed correctly
             call_args = mock_session.get.call_args
@@ -178,7 +188,9 @@ class TestMAASAPI:
             },
             clear=True,
         ):
-            with patch("requests.Session") as mock_session_class:
+            with patch(
+                "maas_cpu_analyzer.maas_client.requests.Session"
+            ) as mock_session_class:
                 mock_session = Mock()
                 mock_session_class.return_value = mock_session
 
@@ -189,7 +201,7 @@ class TestMAASAPI:
                 mock_response.raise_for_status.return_value = None
                 mock_session.get.return_value = mock_response
 
-                analyzer.fetch_maas_data()
+                analyzer.maas_client.fetch_maas_data()
 
                 # Verify the API URL was constructed correctly without double slash
                 call_args = mock_session.get.call_args
@@ -200,7 +212,9 @@ class TestMAASAPI:
         """Test verbose logging during MAAS data fetching."""
         analyzer = MAASCPUAnalyzer(verbose=True)
 
-        with patch("requests.Session") as mock_session_class:
+        with patch(
+            "maas_cpu_analyzer.maas_client.requests.Session"
+        ) as mock_session_class:
             mock_session = Mock()
             mock_session_class.return_value = mock_session
 
@@ -211,12 +225,12 @@ class TestMAASAPI:
             mock_response.headers = {"Content-Type": "application/json"}
             mock_session.get.return_value = mock_response
 
-            analyzer.fetch_maas_data()
+            analyzer.maas_client.fetch_maas_data()
 
             captured = capsys.readouterr()
-            assert "Making request to:" in captured.err
-            assert "Response status: 200" in captured.err
-            assert "Successfully fetched machine data" in captured.err
+            assert "Making request to:" in captured.out
+            assert "Response status: 200" in captured.out
+            assert "Successfully fetched machine data" in captured.out
 
     def test_fetch_maas_data_error_response_logging(
         self, mock_environment_variables, capsys
@@ -224,7 +238,9 @@ class TestMAASAPI:
         """Test error response logging during MAAS data fetching."""
         analyzer = MAASCPUAnalyzer(verbose=True)
 
-        with patch("requests.Session") as mock_session_class:
+        with patch(
+            "maas_cpu_analyzer.maas_client.requests.Session"
+        ) as mock_session_class:
             mock_session = Mock()
             mock_session_class.return_value = mock_session
 
@@ -238,8 +254,8 @@ class TestMAASAPI:
             mock_session.get.return_value = mock_response
 
             with pytest.raises(SystemExit):
-                analyzer.fetch_maas_data()
+                analyzer.maas_client.fetch_maas_data()
 
             captured = capsys.readouterr()
-            assert "Response status: 500" in captured.err
-            assert "Response body: Internal Server Error" in captured.err
+            assert "Response status: 500" in captured.out
+            assert "Response body: Internal Server Error" in captured.out

@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from maas_cpu_analyzer.maas_cpu_analyzer import MAASCPUAnalyzer
+from maas_cpu_analyzer.openstack_client import OpenStackClient
 
 
 class TestOpenStackAPI:
@@ -14,7 +15,9 @@ class TestOpenStackAPI:
         """Test successful OpenStack token retrieval."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch("requests.Session") as mock_session_class:
+        with patch(
+            "maas_cpu_analyzer.openstack_client.requests.Session"
+        ) as mock_session_class:
             mock_session = Mock()
             mock_session_class.return_value = mock_session
 
@@ -23,17 +26,17 @@ class TestOpenStackAPI:
             mock_response.headers = {"X-Subject-Token": "test-token-12345"}
             mock_session.post.return_value = mock_response
 
-            token = analyzer._get_openstack_token()
+            token = analyzer.openstack_client._get_openstack_token()
 
             assert token == "test-token-12345"
-            assert analyzer._auth_token == "test-token-12345"
+            assert analyzer.openstack_client._auth_token == "test-token-12345"
 
     def test_get_openstack_token_cached(self, mock_environment_variables):
         """Test OpenStack token caching."""
         analyzer = MAASCPUAnalyzer()
-        analyzer._auth_token = "cached-token"
+        analyzer.openstack_client._auth_token = "cached-token"
 
-        token = analyzer._get_openstack_token()
+        token = analyzer.openstack_client._get_openstack_token()
 
         assert token == "cached-token"
 
@@ -45,13 +48,15 @@ class TestOpenStackAPI:
             with pytest.raises(
                 ValueError, match="Missing required OpenStack environment variables"
             ):
-                analyzer._get_openstack_token()
+                analyzer.openstack_client._get_openstack_token()
 
     def test_get_openstack_token_auth_failure(self, mock_environment_variables):
         """Test OpenStack token retrieval with authentication failure."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch("requests.Session") as mock_session_class:
+        with patch(
+            "maas_cpu_analyzer.openstack_client.requests.Session"
+        ) as mock_session_class:
             mock_session = Mock()
             mock_session_class.return_value = mock_session
 
@@ -60,7 +65,7 @@ class TestOpenStackAPI:
             mock_response.text = "Unauthorized"
             mock_session.post.return_value = mock_response
 
-            token = analyzer._get_openstack_token()
+            token = analyzer.openstack_client._get_openstack_token()
 
             assert token is None
 
@@ -68,7 +73,9 @@ class TestOpenStackAPI:
         """Test OpenStack token retrieval when no token in response headers."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch("requests.Session") as mock_session_class:
+        with patch(
+            "maas_cpu_analyzer.openstack_client.requests.Session"
+        ) as mock_session_class:
             mock_session = Mock()
             mock_session_class.return_value = mock_session
 
@@ -77,7 +84,7 @@ class TestOpenStackAPI:
             mock_response.headers = {}  # No X-Subject-Token header
             mock_session.post.return_value = mock_response
 
-            token = analyzer._get_openstack_token()
+            token = analyzer.openstack_client._get_openstack_token()
 
             assert token is None
 
@@ -87,7 +94,9 @@ class TestOpenStackAPI:
         """Test successful service catalog retrieval."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch("requests.Session") as mock_session_class:
+        with patch(
+            "maas_cpu_analyzer.openstack_client.requests.Session"
+        ) as mock_session_class:
             mock_session = Mock()
             mock_session_class.return_value = mock_session
 
@@ -98,21 +107,25 @@ class TestOpenStackAPI:
 
             # Mock the token retrieval
             with patch.object(
-                analyzer, "_get_openstack_token", return_value="test-token"
+                analyzer.openstack_client,
+                "_get_openstack_token",
+                return_value="test-token",
             ):
-                catalog = analyzer._get_service_catalog()
+                catalog = analyzer.openstack_client._get_service_catalog()
 
                 assert catalog == mock_service_catalog
-                assert analyzer._service_catalog == mock_service_catalog
+                assert (
+                    analyzer.openstack_client._service_catalog == mock_service_catalog
+                )
 
     def test_get_service_catalog_cached(
         self, mock_environment_variables, mock_service_catalog
     ):
         """Test service catalog caching."""
         analyzer = MAASCPUAnalyzer()
-        analyzer._service_catalog = mock_service_catalog
+        analyzer.openstack_client._service_catalog = mock_service_catalog
 
-        catalog = analyzer._get_service_catalog()
+        catalog = analyzer.openstack_client._get_service_catalog()
 
         assert catalog == mock_service_catalog
 
@@ -121,7 +134,7 @@ class TestOpenStackAPI:
         analyzer = MAASCPUAnalyzer()
 
         with patch.dict("os.environ", {}, clear=True):
-            catalog = analyzer._get_service_catalog()
+            catalog = analyzer.openstack_client._get_service_catalog()
 
             assert catalog is None
 
@@ -129,7 +142,9 @@ class TestOpenStackAPI:
         """Test service catalog retrieval with invalid catalog structure."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch("requests.Session") as mock_session_class:
+        with patch(
+            "maas_cpu_analyzer.openstack_client.requests.Session"
+        ) as mock_session_class:
             mock_session = Mock()
             mock_session_class.return_value = mock_session
 
@@ -141,9 +156,11 @@ class TestOpenStackAPI:
             mock_session.get.return_value = mock_response
 
             with patch.object(
-                analyzer, "_get_openstack_token", return_value="test-token"
+                analyzer.openstack_client,
+                "_get_openstack_token",
+                return_value="test-token",
             ):
-                catalog = analyzer._get_service_catalog()
+                catalog = analyzer.openstack_client._get_service_catalog()
 
                 assert catalog is None
 
@@ -154,18 +171,26 @@ class TestOpenStackAPI:
         analyzer = MAASCPUAnalyzer()
 
         with patch.object(
-            analyzer, "_get_service_catalog", return_value=mock_service_catalog
+            analyzer.openstack_client,
+            "_get_service_catalog",
+            return_value=mock_service_catalog,
         ):
-            endpoint = analyzer._get_service_endpoint("placement", "public")
+            endpoint = analyzer.openstack_client._get_service_endpoint(
+                "placement", "public"
+            )
 
             assert endpoint == "http://test-openstack:8778"
 
     def test_get_service_endpoint_cached(self, mock_environment_variables):
         """Test service endpoint caching."""
         analyzer = MAASCPUAnalyzer()
-        analyzer._service_endpoints["placement:public"] = "cached-endpoint"
+        analyzer.openstack_client._service_endpoints["placement:public"] = (
+            "cached-endpoint"
+        )
 
-        endpoint = analyzer._get_service_endpoint("placement", "public")
+        endpoint = analyzer.openstack_client._get_service_endpoint(
+            "placement", "public"
+        )
 
         assert endpoint == "cached-endpoint"
 
@@ -173,8 +198,12 @@ class TestOpenStackAPI:
         """Test service endpoint retrieval with no service catalog."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch.object(analyzer, "_get_service_catalog", return_value=None):
-            endpoint = analyzer._get_service_endpoint("placement", "public")
+        with patch.object(
+            analyzer.openstack_client, "_get_service_catalog", return_value=None
+        ):
+            endpoint = analyzer.openstack_client._get_service_endpoint(
+                "placement", "public"
+            )
 
             assert endpoint is None
 
@@ -185,9 +214,13 @@ class TestOpenStackAPI:
         analyzer = MAASCPUAnalyzer()
 
         with patch.object(
-            analyzer, "_get_service_catalog", return_value=mock_service_catalog
+            analyzer.openstack_client,
+            "_get_service_catalog",
+            return_value=mock_service_catalog,
         ):
-            endpoint = analyzer._get_service_endpoint("nonexistent", "public")
+            endpoint = analyzer.openstack_client._get_service_endpoint(
+                "nonexistent", "public"
+            )
 
             assert endpoint is None
 
@@ -196,19 +229,21 @@ class TestOpenStackAPI:
         analyzer = MAASCPUAnalyzer()
 
         with patch.object(
-            analyzer, "_get_service_endpoint", return_value="http://test:8778"
+            analyzer.openstack_client,
+            "_get_service_endpoint",
+            return_value="http://test:8778",
         ):
-            endpoint = analyzer._get_placement_endpoint()
+            endpoint = analyzer.openstack_client._get_placement_endpoint()
 
             assert endpoint == "http://test:8778"
-            assert analyzer._placement_endpoint == "http://test:8778"
+            assert analyzer.openstack_client._placement_endpoint == "http://test:8778"
 
     def test_get_placement_endpoint_cached(self, mock_environment_variables):
         """Test placement endpoint caching."""
         analyzer = MAASCPUAnalyzer()
-        analyzer._placement_endpoint = "cached-endpoint"
+        analyzer.openstack_client._placement_endpoint = "cached-endpoint"
 
-        endpoint = analyzer._get_placement_endpoint()
+        endpoint = analyzer.openstack_client._get_placement_endpoint()
 
         assert endpoint == "cached-endpoint"
 
@@ -216,8 +251,10 @@ class TestOpenStackAPI:
         """Test placement endpoint retrieval when service is not found."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch.object(analyzer, "_get_service_endpoint", return_value=None):
-            endpoint = analyzer._get_placement_endpoint()
+        with patch.object(
+            analyzer.openstack_client, "_get_service_endpoint", return_value=None
+        ):
+            endpoint = analyzer.openstack_client._get_placement_endpoint()
 
             assert endpoint is None
 
@@ -227,7 +264,9 @@ class TestOpenStackAPI:
         """Test successful resource providers retrieval."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch.object(analyzer, "_make_placement_api_request") as mock_request:
+        with patch.object(
+            analyzer.openstack_client, "make_placement_api_request"
+        ) as mock_request:
             mock_response = Mock()
             mock_response.status_code = 200
             mock_response.json.return_value = {
@@ -235,7 +274,7 @@ class TestOpenStackAPI:
             }
             mock_request.return_value = mock_response
 
-            providers = analyzer._get_resource_providers()
+            providers = analyzer.openstack_client.get_resource_providers()
 
             assert providers == sample_resource_providers
             mock_request.assert_called_once_with("GET", "/resource_providers")
@@ -244,13 +283,15 @@ class TestOpenStackAPI:
         """Test resource providers retrieval failure."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch.object(analyzer, "_make_placement_api_request") as mock_request:
+        with patch.object(
+            analyzer.openstack_client, "make_placement_api_request"
+        ) as mock_request:
             mock_response = Mock()
             mock_response.status_code = 500
             mock_response.text = "Internal Server Error"
             mock_request.return_value = mock_response
 
-            providers = analyzer._get_resource_providers()
+            providers = analyzer.openstack_client.get_resource_providers()
 
             assert providers == []
 
@@ -261,12 +302,18 @@ class TestOpenStackAPI:
         analyzer = MAASCPUAnalyzer()
 
         with patch.object(
-            analyzer, "_get_service_endpoint", return_value="http://test:8774"
+            analyzer.openstack_client,
+            "_get_service_endpoint",
+            return_value="http://test:8774",
         ):
             with patch.object(
-                analyzer, "_get_openstack_token", return_value="test-token"
+                analyzer.openstack_client,
+                "_get_openstack_token",
+                return_value="test-token",
             ):
-                with patch("requests.Session") as mock_session_class:
+                with patch(
+                    "maas_cpu_analyzer.openstack_client.requests.Session"
+                ) as mock_session_class:
                     mock_session = Mock()
                     mock_session_class.return_value = mock_session
 
@@ -277,7 +324,7 @@ class TestOpenStackAPI:
                     }
                     mock_session.get.return_value = mock_response
 
-                    hypervisors = analyzer._get_hypervisors()
+                    hypervisors = analyzer.openstack_client.get_hypervisors()
 
                     assert hypervisors == sample_openstack_hypervisors
 
@@ -285,8 +332,10 @@ class TestOpenStackAPI:
         """Test hypervisors retrieval when Nova endpoint is not found."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch.object(analyzer, "_get_service_endpoint", return_value=None):
-            hypervisors = analyzer._get_hypervisors()
+        with patch.object(
+            analyzer.openstack_client, "_get_service_endpoint", return_value=None
+        ):
+            hypervisors = analyzer.openstack_client.get_hypervisors()
 
             assert hypervisors == []
 
@@ -295,10 +344,14 @@ class TestOpenStackAPI:
         analyzer = MAASCPUAnalyzer()
 
         with patch.object(
-            analyzer, "_get_service_endpoint", return_value="http://test:8774"
+            analyzer.openstack_client,
+            "_get_service_endpoint",
+            return_value="http://test:8774",
         ):
-            with patch.object(analyzer, "_get_openstack_token", return_value=None):
-                hypervisors = analyzer._get_hypervisors()
+            with patch.object(
+                analyzer.openstack_client, "_get_openstack_token", return_value=None
+            ):
+                hypervisors = analyzer.openstack_client.get_hypervisors()
 
                 assert hypervisors == []
 
@@ -306,11 +359,15 @@ class TestOpenStackAPI:
         """Test successful OpenStack connectivity check."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch.object(analyzer, "_get_openstack_token", return_value="test-token"):
+        with patch.object(
+            analyzer.openstack_client, "_get_openstack_token", return_value="test-token"
+        ):
             with patch.object(
-                analyzer, "_get_placement_endpoint", return_value="http://test:8778"
+                analyzer.openstack_client,
+                "_get_placement_endpoint",
+                return_value="http://test:8778",
             ):
-                result = analyzer._check_openstack_connectivity()
+                result = analyzer.openstack_client.check_openstack_connectivity()
 
                 assert result is True
 
@@ -318,8 +375,10 @@ class TestOpenStackAPI:
         """Test OpenStack connectivity check with no authentication token."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch.object(analyzer, "_get_openstack_token", return_value=None):
-            result = analyzer._check_openstack_connectivity()
+        with patch.object(
+            analyzer.openstack_client, "_get_openstack_token", return_value=None
+        ):
+            result = analyzer.openstack_client.check_openstack_connectivity()
 
             assert result is False
 
@@ -327,9 +386,13 @@ class TestOpenStackAPI:
         """Test OpenStack connectivity check with no placement endpoint."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch.object(analyzer, "_get_openstack_token", return_value="test-token"):
-            with patch.object(analyzer, "_get_placement_endpoint", return_value=None):
-                result = analyzer._check_openstack_connectivity()
+        with patch.object(
+            analyzer.openstack_client, "_get_openstack_token", return_value="test-token"
+        ):
+            with patch.object(
+                analyzer.openstack_client, "_get_placement_endpoint", return_value=None
+            ):
+                result = analyzer.openstack_client.check_openstack_connectivity()
 
                 assert result is False
 
@@ -338,44 +401,59 @@ class TestOpenStackAPI:
         analyzer = MAASCPUAnalyzer()
 
         with patch.object(
-            analyzer, "_get_placement_endpoint", return_value="http://test:8778"
+            analyzer.openstack_client,
+            "_get_placement_endpoint",
+            return_value="http://test:8778",
         ):
             with patch.object(
-                analyzer, "_get_openstack_token", return_value="test-token"
+                analyzer.openstack_client,
+                "_get_openstack_token",
+                return_value="test-token",
             ):
-                with patch("requests.Session") as mock_session_class:
+                with patch(
+                    "maas_cpu_analyzer.openstack_client.requests.Session"
+                ) as mock_session_class:
                     mock_session = Mock()
                     mock_session_class.return_value = mock_session
 
                     mock_response = Mock()
                     mock_response.status_code = 200
                     mock_response.text = "Success"
-                    mock_session.request.return_value = mock_response
+                    mock_session.get.return_value = mock_response
 
-                    response = analyzer._make_placement_api_request("GET", "/test")
+                    response = analyzer.openstack_client.make_placement_api_request(
+                        "GET", "/test"
+                    )
 
+                    # Our client uses session.get for GET requests
                     assert response == mock_response
-                    mock_session.request.assert_called_once()
+                    mock_session.get.assert_called_once()
 
     def test_make_placement_api_request_no_endpoint(self, mock_environment_variables):
         """Test placement API request with no endpoint."""
         analyzer = MAASCPUAnalyzer()
 
-        with patch.object(analyzer, "_get_placement_endpoint", return_value=None):
+        with patch.object(
+            analyzer.openstack_client, "_get_placement_endpoint", return_value=None
+        ):
             with pytest.raises(
-                ValueError, match="Could not determine placement service endpoint"
+                Exception, match="Placement service endpoint not available"
             ):
-                analyzer._make_placement_api_request("GET", "/test")
+                analyzer.openstack_client.make_placement_api_request("GET", "/test")
 
     def test_make_placement_api_request_no_token(self, mock_environment_variables):
         """Test placement API request with no authentication token."""
         analyzer = MAASCPUAnalyzer()
 
         with patch.object(
-            analyzer, "_get_placement_endpoint", return_value="http://test:8778"
+            analyzer.openstack_client,
+            "_get_placement_endpoint",
+            return_value="http://test:8778",
         ):
-            with patch.object(analyzer, "_get_openstack_token", return_value=None):
+            with patch.object(
+                analyzer.openstack_client, "_get_openstack_token", return_value=None
+            ):
                 with pytest.raises(
-                    ValueError, match="Could not obtain OpenStack authentication token"
+                    Exception, match="OpenStack authentication token not available"
                 ):
-                    analyzer._make_placement_api_request("GET", "/test")
+                    analyzer.openstack_client.make_placement_api_request("GET", "/test")

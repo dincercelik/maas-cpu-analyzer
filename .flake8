@@ -1,0 +1,109 @@
+[flake8]
+max-line-length = 88
+extend-ignore =
+    E203,
+    W503,
+    E501,
+    D100,
+    D101,
+    D102,
+    D103,
+    D104,
+    D105,
+    D107,
+    D400,
+    D401,
+    I100,
+    I201,
+    Q000
+
+# PEP 8 enforcement
+select =
+    E,     # pycodestyle errors
+    W,     # pycodestyle warnings
+    F,     # pyflakes
+    C,     # mccabe complexity
+    B,     # flake8-bugbear
+    N,     # pep8-naming
+    S,     # bandit security issues
+    T,     # flake8-builtins
+    R,     # flake8-return
+    P,     # flake8-pie
+    A,     # flake8-annotations
+    COM,   # flake8-commas
+    C4,    # flake8-comprehensions
+    DJ,    # flake8-django
+    EM,    # flake8-errmsg
+    EXE,   # flake8-executable
+    FA,    # flake8-future-annotations
+    ISC,   # flake8-implicit-str-concat
+    IC,    # flake8-import-conventions
+    G,     # flake8-logging-format
+    INP,   # flake8-no-pep420
+    PIE,   # flake8-pie
+    T20,   # flake8-print
+    PT,    # flake8-pytest-style
+    RSE,   # flake8-raise
+    RET,   # flake8-return
+    SLF,   # flake8-self
+    SLOT,  # flake8-slots
+    SIM,   # flake8-simplify
+    TID,   # flake8-tidy-imports
+    TCH,   # flake8-type-checking
+    INT,   # flake8-gettext
+    ARG,   # flake8-unused-arguments
+    PL,    # pylint
+    UP,    # pyupgrade
+
+exclude =
+    .git,
+    __pycache__,
+    .tox,
+    .eggs,
+    *.egg,
+    build,
+    dist,
+    .venv,
+    venv,
+    .pytest_cache,
+    .coverage,
+    htmlcov,
+    .mypy_cache,
+    .ruff_cache
+
+# Per-file ignores
+per-file-ignores =
+    # Tests can have longer lines and more complex logic
+    tests/*:E501,W503,C901,S101,S106,S108,S110,S112,S311,S701,SIM117,R504,F401,F841,Q000
+    # Setup files can be more lenient
+    setup.py:E501,W503
+    # Configuration files
+    tox.ini:E501
+    pyproject.toml:E501
+    setup.cfg:E501
+    # Main analyzer has some complex methods that are acceptable
+    maas_cpu_analyzer/maas_cpu_analyzer.py:C901,R505,SIM102,SIM114,R508
+
+# Complexity settings
+max-complexity = 10
+
+# Naming conventions
+naming-convention =
+    # Variables
+    variable-rgx=^[a-z_][a-z0-9_]*$
+    # Constants
+    const-rgx=^[A-Z_][A-Z0-9_]*$
+    # Classes
+    class-rgx=^[A-Z][a-zA-Z0-9]*$
+    # Functions
+    function-rgx=^[a-z_][a-z0-9_]*$
+    # Methods
+    method-rgx=^[a-z_][a-z0-9_]*$
+    # Modules
+    module-rgx=^[a-z_][a-z0-9_]*$
+    # Packages
+    package-rgx=^[a-z_][a-z0-9_]*$
+
+# Import sorting
+import-order-style = google
+application-import-names = maas_cpu_analyzer

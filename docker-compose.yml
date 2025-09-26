@@ -1,0 +1,53 @@
+services:
+  maas-cpu-analyzer:
+    build: .
+    container_name: maas-cpu-analyzer
+    environment:
+      # MAAS Configuration
+      - MAAS_URL=${MAAS_URL}
+      - MAAS_API_KEY=${MAAS_API_KEY}
+
+      # OpenStack Configuration
+      - OS_AUTH_URL=${OS_AUTH_URL}
+      - OS_USERNAME=${OS_USERNAME}
+      - OS_PASSWORD=${OS_PASSWORD}
+      - OS_PROJECT_NAME=${OS_PROJECT_NAME}
+      - OS_USER_DOMAIN_NAME=${OS_USER_DOMAIN_NAME:-Default}
+      - OS_PROJECT_DOMAIN_NAME=${OS_PROJECT_DOMAIN_NAME:-Default}
+
+
+    # Override the default command
+    command: ["--verbose"]
+
+    # Mount volumes for persistent data (optional)
+    # volumes:
+    #   - ./logs:/app/logs
+
+    # Restart policy
+    restart: unless-stopped
+
+  # Development service with live code mounting
+  maas-cpu-analyzer-dev:
+    build: .
+    container_name: maas-cpu-analyzer-dev
+    environment:
+      - MAAS_URL=${MAAS_URL}
+      - MAAS_API_KEY=${MAAS_API_KEY}
+      - OS_AUTH_URL=${OS_AUTH_URL}
+      - OS_USERNAME=${OS_USERNAME}
+      - OS_PASSWORD=${OS_PASSWORD}
+      - OS_PROJECT_NAME=${OS_PROJECT_NAME}
+      - OS_USER_DOMAIN_NAME=${OS_USER_DOMAIN_NAME:-Default}
+      - OS_PROJECT_DOMAIN_NAME=${OS_PROJECT_DOMAIN_NAME:-Default}
+
+    # Mount source code for development
+    volumes:
+      - .:/app
+      - /app/venv  # Exclude venv from volume mount
+
+    # Override entrypoint for development
+    entrypoint: ["python", "-m", "maas_cpu_analyzer.maas_cpu_analyzer"]
+    command: ["--verbose"]
+
+    # Restart policy
+    restart: "no"
