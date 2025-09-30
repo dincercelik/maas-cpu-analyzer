@@ -9,12 +9,13 @@ This module handles all OpenStack-related operations including:
 """
 
 import json
-import os
 import sys
 from contextlib import suppress
 from typing import Dict, List, Optional
 
 import requests
+
+from .config import get_value
 
 
 class OpenStackClient:
@@ -33,11 +34,6 @@ class OpenStackClient:
         self._service_catalog: Optional[Dict] = None
         self._service_endpoints: Dict[str, str] = {}
         self._session = None
-        self._custom_trait_pattern = None  # Will be set by main class
-
-    def set_custom_trait_pattern(self, pattern):
-        """Set the custom trait pattern"""
-        self._custom_trait_pattern = pattern
 
     def log(self, message: str) -> None:
         """Log message if verbose mode is enabled"""
@@ -56,35 +52,29 @@ class OpenStackClient:
                 self._session.headers.update({"Content-Type": "application/json"})
         return self._session
 
-    def _clear_cache(self) -> None:
-        """Clear all cached data"""
-        self._auth_token = None
-        self._placement_endpoint = None
-        self._service_catalog = None
-        self._service_endpoints = {}
-
     def check_openstack_environment(self) -> None:
-        """Check for required OpenStack environment variables"""
-        required_vars = [
-            "OS_AUTH_URL",
-            "OS_USERNAME",
-            "OS_PASSWORD",
-            "OS_PROJECT_NAME",
-        ]
-        missing_vars = [var for var in required_vars if not os.environ.get(var)]
+        """Check for required OpenStack configuration via env or config.ini"""
+        required = {
+            "OS_AUTH_URL": ("openstack", "auth_url"),
+            "OS_USERNAME": ("openstack", "username"),
+            "OS_PASSWORD": ("openstack", "password"),
+            "OS_PROJECT_NAME": ("openstack", "project_name"),
+        }
+        missing = []
+        for env_name, (section, option) in required.items():
+            if not get_value(env_name, section, option):
+                missing.append(env_name)
 
-        if missing_vars:
+        if missing:
             print(
-                "Error: Missing required OpenStack environment variables:",
+                "Error: Missing required OpenStack settings (env or config.ini):",
                 file=sys.stderr,
             )
-            for var in missing_vars:
+            for var in missing:
                 print(f"  {var}", file=sys.stderr)
-            print("Please set the following environment variables:", file=sys.stderr)
-            print("  export OS_AUTH_URL='your-auth-url'", file=sys.stderr)
-            print("  export OS_USERNAME='your-username'", file=sys.stderr)
-            print("  export OS_PASSWORD='your-password'", file=sys.stderr)
-            print("  export OS_PROJECT_NAME='your-project'", file=sys.stderr)
+            print(
+                "Provide them via environment variables or config.ini.", file=sys.stderr
+            )
             sys.exit(1)
 
     def _get_openstack_token(self) -> Optional[str]:
@@ -93,8 +83,8 @@ class OpenStackClient:
         if self._auth_token:
             return self._auth_token
 
-        # Get environment variables
-        env_vars = self._get_openstack_env_vars()
+        # Get configuration values (env-first, then config.ini)
+        env_vars = self._get_openstack_settings()
 
         # Prepare authentication data
         auth_data = self._prepare_auth_data(env_vars)
@@ -102,14 +92,18 @@ class OpenStackClient:
         # Make authentication request
         return self._make_auth_request(env_vars["auth_url"], auth_data)
 
-    def _get_openstack_env_vars(self) -> Dict[str, str]:
-        """Get OpenStack environment variables"""
-        auth_url = os.environ.get("OS_AUTH_URL")
-        username = os.environ.get("OS_USERNAME")
-        password = os.environ.get("OS_PASSWORD")
-        project_name = os.environ.get("OS_PROJECT_NAME")
-        user_domain_name = os.environ.get("OS_USER_DOMAIN_NAME", "Default")
-        project_domain_name = os.environ.get("OS_PROJECT_DOMAIN_NAME", "Default")
+    def _get_openstack_settings(self) -> Dict[str, str]:
+        """Get OpenStack configuration values (env-first, then config.ini)"""
+        auth_url = get_value("OS_AUTH_URL", "openstack", "auth_url")
+        username = get_value("OS_USERNAME", "openstack", "username")
+        password = get_value("OS_PASSWORD", "openstack", "password")
+        project_name = get_value("OS_PROJECT_NAME", "openstack", "project_name")
+        user_domain_name = get_value(
+            "OS_USER_DOMAIN_NAME", "openstack", "user_domain_name", "Default"
+        )
+        project_domain_name = get_value(
+            "OS_PROJECT_DOMAIN_NAME", "openstack", "project_domain_name", "Default"
+        )
 
         if not all([auth_url, username, password, project_name]):
             raise ValueError("Missing required OpenStack environment variables")
@@ -199,7 +193,7 @@ class OpenStackClient:
         if self._service_catalog:
             return self._service_catalog
 
-        auth_url = os.environ.get("OS_AUTH_URL")
+        auth_url = get_value("OS_AUTH_URL", "openstack", "auth_url")
         if not auth_url:
             return None
 

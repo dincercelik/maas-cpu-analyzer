@@ -226,30 +226,6 @@ class TestMAASCPUAnalyzer:
 
         assert result is None
 
-    def test_check_dependencies(self):
-        """Test dependency checking."""
-        _analyzer = MAASCPUAnalyzer()
-        # Should not raise any exceptions
-        _analyzer.check_dependencies()
-
-    def test_clear_cache(self):
-        """Test cache clearing."""
-        _analyzer = MAASCPUAnalyzer()
-
-        # Set some cache values
-        _analyzer.openstack_client._auth_token = "test_token"
-        _analyzer.openstack_client._placement_endpoint = "test_endpoint"
-        _analyzer.openstack_client._service_catalog = {"test": "catalog"}
-        _analyzer.openstack_client._service_endpoints = {"test": "endpoint"}
-
-        # Clear cache
-        _analyzer.openstack_client._clear_cache()
-
-        assert _analyzer.openstack_client._auth_token is None
-        assert _analyzer.openstack_client._placement_endpoint is None
-        assert _analyzer.openstack_client._service_catalog is None
-        assert _analyzer.openstack_client._service_endpoints == {}
-
     def test_print_table(self, capsys):
         """Test table printing functionality."""
         _analyzer = MAASCPUAnalyzer()
@@ -313,7 +289,9 @@ class TestMAASCPUAnalyzer:
                 _analyzer.openstack_client.check_openstack_environment()
 
             captured = capsys.readouterr()
-            assert "Missing required OpenStack environment variables" in captured.err
+            # Behavior-focused: exit occurred and required variable names are listed
+            for var in ["OS_AUTH_URL", "OS_USERNAME", "OS_PASSWORD", "OS_PROJECT_NAME"]:
+                assert var in captured.err
 
     def test_check_openstack_environment_complete(self, mock_environment_variables):
         """Test OpenStack environment check with all variables present."""

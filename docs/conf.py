@@ -88,6 +88,10 @@ intersphinx_mapping = {
     "requests": ("https://requests.readthedocs.io/en/latest/", None),
 }
 
+# Do not fail builds if intersphinx inventories are unreachable (offline CI)
+intersphinx_disabled_reftypes = {"*"}
+intersphinx_timeout = 1
+
 # -- Options for Napoleon extension ------------------------------------------
 
 # Napoleon settings for Google-style docstrings

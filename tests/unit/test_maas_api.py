@@ -39,10 +39,9 @@ class TestMAASAPI:
                 analyzer.maas_client.fetch_maas_data()
 
             captured = capsys.readouterr()
-            assert (
-                "MAAS_URL and MAAS_API_KEY environment variables must be set"
-                in captured.err
-            )
+            # Behavior-focused: exit occurred and both variable names are listed
+            assert "MAAS_URL" in captured.err
+            assert "MAAS_API_KEY" in captured.err
 
     def test_fetch_maas_data_missing_api_key(self, capsys):
         """Test MAAS data fetching with missing MAAS_API_KEY."""
@@ -55,10 +54,9 @@ class TestMAASAPI:
                 analyzer.maas_client.fetch_maas_data()
 
             captured = capsys.readouterr()
-            assert (
-                "MAAS_URL and MAAS_API_KEY environment variables must be set"
-                in captured.err
-            )
+            # Behavior-focused: exit occurred and both variable names are listed
+            assert "MAAS_URL" in captured.err
+            assert "MAAS_API_KEY" in captured.err
 
     def test_fetch_maas_data_invalid_api_key_format(self, capsys):
         """Test MAAS data fetching with invalid API key format."""

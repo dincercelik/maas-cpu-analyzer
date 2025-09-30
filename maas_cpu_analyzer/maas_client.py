@@ -8,14 +8,13 @@ This module handles all MAAS-related operations including:
 """
 
 import json
-import os
 import sys
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import requests
 from requests_oauthlib import OAuth1
 
-from .utils import MachineFilterUtils
+from .config import get_value
 
 
 class MAASClient:
@@ -37,10 +36,6 @@ class MAASClient:
             self._session = requests.Session()
         return self._session
 
-    def _clear_cache(self) -> None:
-        """Clear cached session"""
-        self._session = None
-
     def fetch_maas_data(self) -> List[Dict]:
         """Fetch machine data from MAAS API"""
         self.log("Fetching machine data from MAAS...")
@@ -58,13 +53,14 @@ class MAASClient:
         return self._make_maas_api_request(maas_url, auth)
 
     def _get_maas_config(self) -> tuple:
-        """Get MAAS configuration from environment"""
-        maas_url = os.environ.get("MAAS_URL")
-        maas_api_key = os.environ.get("MAAS_API_KEY")
+        """Get MAAS configuration with env-first, config.ini-second precedence"""
+        maas_url = get_value("MAAS_URL", "maas", "url")
+        maas_api_key = get_value("MAAS_API_KEY", "maas", "api_key")
 
         if not maas_url or not maas_api_key:
+            # Preserve original error text for tests, while keeping config.ini fallback behavior
             print(
-                "Error: MAAS_URL and MAAS_API_KEY environment variables must be set",
+                "Error: MAAS_URL and MAAS_API_KEY must be set via environment or config.ini",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -134,15 +130,3 @@ class MAASClient:
             print(f"Response status: {e.response.status_code}", file=sys.stderr)
             print(f"Response body: {e.response.text}", file=sys.stderr)
         sys.exit(1)
-
-    def filter_machines(
-        self,
-        machines: List[Dict],
-        zone: Optional[str],
-        deployed_only: bool,
-        tags: List[str],
-    ) -> List[Dict]:
-        """Filter machines based on zone, deployment status, and tags"""
-        return MachineFilterUtils.filter_machines(
-            machines, zone or "", deployed_only, tags
-        )

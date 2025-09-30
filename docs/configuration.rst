@@ -175,7 +175,39 @@ Output Options
 Configuration Files
 -------------------
 
-The MAAS CPU Analyzer doesn't currently support configuration files, but all configuration can be done through environment variables and command-line arguments.
+You can optionally configure the application via a `config.ini` file. Environment variables always take precedence over values in `config.ini`.
+
+Lookup order:
+
+1. Environment variables (e.g. `MAAS_URL`, `OS_AUTH_URL`)
+2. `config.ini` values
+
+Default search locations for `config.ini`:
+
+- Current working directory: `./config.ini`
+- Project root: `config.ini`
+
+You can also explicitly point to a config file using the `CONFIG_INI` environment variable:
+
+.. code-block:: bash
+
+   export CONFIG_INI="/path/to/config.ini"
+
+Example `config.ini`:
+
+.. code-block:: text
+
+   [maas]
+   url = http://maas.example.com:5240/MAAS
+   api_key = consumer:token:secret
+
+   [openstack]
+   auth_url = http://openstack.example.com:5000/v3
+   username = admin
+   password = your-password
+   project_name = admin
+   user_domain_name = Default
+   project_domain_name = Default
 
 Example Configurations
 ----------------------

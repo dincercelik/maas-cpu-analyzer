@@ -61,7 +61,7 @@ pip install -r requirements.txt
 
 **Note**: The requirements are pinned for compatibility with MAAS 3.5+ and OpenStack 2024.1+.
 
-### Set up Environment Variables
+### Configure via Environment or config.ini
 ```bash
 # Required for all operations:
 export MAAS_URL="http://your-maas-server:5240/MAAS"
@@ -104,6 +104,30 @@ maas-cpu-analyzer --verbose
 
 # Show help
 maas-cpu-analyzer --help
+```
+
+Environment variables have priority. If an env var is not set, the tool will look for the corresponding value in a `config.ini` file.
+
+Search order for `config.ini`:
+
+- `CONFIG_INI` environment variable if set (absolute path)
+- `./config.ini` (current working directory)
+- `config.ini` at the project root
+
+Example `config.ini`:
+
+```ini
+[maas]
+url = http://your-maas-server:5240/MAAS
+api_key = your-maas-api-key
+
+[openstack]
+auth_url = http://your-openstack:5000/v3
+username = your-username
+password = your-password
+project_name = your-project
+user_domain_name = Default
+project_domain_name = Default
 ```
 
 ## Environment Variables

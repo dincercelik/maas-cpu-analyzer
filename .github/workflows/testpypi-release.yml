@@ -1,13 +1,13 @@
-name: Release
+name: TestPyPI Release
 
 on:
   push:
     tags:
-      - "v*"
+      - "test-*"
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to release (e.g., v1.0.0)"
+        description: "Version to release to TestPyPI (e.g., test-v1.0.0)"
         required: true
         type: string
 
@@ -50,7 +50,7 @@ jobs:
           TOXENV: py${{ matrix.python-version }}
 
   build-and-release:
-    name: Build and Release
+    name: Build and Release to TestPyPI
     runs-on: ubuntu-latest
     needs: [test]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
@@ -80,48 +80,14 @@ jobs:
       - name: Check package
         run: twine check dist/*
 
-      - name: Publish to PyPI
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !startsWith(github.ref, 'refs/tags/test-')
-        uses: pypa/gh-action-pypi-publish@release/v1
-
       - name: Publish to TestPyPI
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/test-')
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
 
-      - name: Create GitHub Release (PyPI)
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !startsWith(github.ref, 'refs/tags/test-')
-        id: create_release_pypi
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body: |
-            ## Changes in ${{ github.ref_name }}
-
-            See [CHANGELOG.md](CHANGELOG.md) for detailed changes.
-
-            ## Installation
-
-            ```bash
-            pip install maas-cpu-analyzer==${{ github.ref_name }}
-            ```
-
-            ## Verification
-
-            ```bash
-            maas-cpu-analyzer --version
-            ```
-          draft: false
-          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
-          files: ./dist/*
-
-      - name: Create GitHub Release (TestPyPI)
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/test-')
-        id: create_release_testpypi
+      - name: Create GitHub Release
+        id: create_release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

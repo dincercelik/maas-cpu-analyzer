@@ -1,13 +1,16 @@
 API Reference
-==============
+=============
 
-This section provides detailed API documentation for the MAAS CPU Analyzer.
+This section provides reference documentation for the main modules, utility classes, configuration, and logging used in MAAS CPU Analyzer.
 
 Core Modules
 ------------
 
 MAAS CPU Analyzer
-~~~~~~~~~~~~~~~~~~
+-----------------
+
+maas_cpu_analyzer.maas_cpu_analyzer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: maas_cpu_analyzer.maas_cpu_analyzer
    :members:
@@ -15,7 +18,10 @@ MAAS CPU Analyzer
    :show-inheritance:
 
 MAAS Client
-~~~~~~~~~~~
+-----------
+
+maas_cpu_analyzer.maas_client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: maas_cpu_analyzer.maas_client
    :members:
@@ -23,7 +29,10 @@ MAAS Client
    :show-inheritance:
 
 OpenStack Client
-~~~~~~~~~~~~~~~~
+----------------
+
+maas_cpu_analyzer.openstack_client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: maas_cpu_analyzer.openstack_client
    :members:
@@ -31,7 +40,10 @@ OpenStack Client
    :show-inheritance:
 
 Trait Manager
-~~~~~~~~~~~~~
+-------------
+
+maas_cpu_analyzer.trait_manager
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: maas_cpu_analyzer.trait_manager
    :members:
@@ -39,7 +51,10 @@ Trait Manager
    :show-inheritance:
 
 Utilities
-~~~~~~~~~
+---------
+
+maas_cpu_analyzer.utils
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: maas_cpu_analyzer.utils
    :members:
@@ -49,8 +64,8 @@ Utilities
 Utility Classes
 ---------------
 
-CPU Utils
-~~~~~~~~~
+CPUUtils
+~~~~~~~~
 
 .. autoclass:: maas_cpu_analyzer.utils.CPUUtils
    :no-index:
@@ -58,8 +73,8 @@ CPU Utils
    :undoc-members:
    :show-inheritance:
 
-Machine Filter Utils
-~~~~~~~~~~~~~~~~~~~~
+MachineFilterUtils
+~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: maas_cpu_analyzer.utils.MachineFilterUtils
    :no-index:
@@ -67,8 +82,8 @@ Machine Filter Utils
    :undoc-members:
    :show-inheritance:
 
-Message Utils
-~~~~~~~~~~~~~
+MessageUtils
+~~~~~~~~~~~~
 
 .. autoclass:: maas_cpu_analyzer.utils.MessageUtils
    :no-index:
@@ -76,8 +91,8 @@ Message Utils
    :undoc-members:
    :show-inheritance:
 
-Table Utils
-~~~~~~~~~~~
+TableUtils
+~~~~~~~~~~
 
 .. autoclass:: maas_cpu_analyzer.utils.TableUtils
    :no-index:
@@ -85,8 +100,8 @@ Table Utils
    :undoc-members:
    :show-inheritance:
 
-Validation Utils
-~~~~~~~~~~~~~~~~
+ValidationUtils
+~~~~~~~~~~~~~~~
 
 .. autoclass:: maas_cpu_analyzer.utils.ValidationUtils
    :no-index:
@@ -97,86 +112,53 @@ Validation Utils
 Error Handling
 --------------
 
-The MAAS CPU Analyzer uses standard Python exceptions and custom error handling within the modules. See the individual module documentation for specific error handling patterns.
+MAAS CPU Analyzer uses standard Python exceptions and custom error handling within its modules. See each module's documentation for details on specific error handling strategies.
 
 Configuration
 -------------
 
-Environment Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Configuration via Environment Variables and config.ini
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following environment variables are used for configuration:
+MAAS CPU Analyzer can be configured using environment variables or a `config.ini` file. Environment variables always take precedence over values in `config.ini`.
 
-MAAS Configuration
-^^^^^^^^^^^^^^^^^^
+**MAAS Configuration**
 
-.. data:: MAAS_URL
-   :annotation: str
+- ``MAAS_URL``: The MAAS API endpoint URL (including the full API path).
+- ``MAAS_API_KEY``: The MAAS API key for authentication.
 
-   The MAAS API endpoint URL. Should include the full path to the API.
+**OpenStack Configuration**
 
-.. data:: MAAS_API_KEY
-   :annotation: str
+- ``OS_AUTH_URL``: The OpenStack authentication URL (Keystone endpoint).
+- ``OS_USERNAME``: The OpenStack username.
+- ``OS_PASSWORD``: The OpenStack password.
+- ``OS_PROJECT_NAME``: The OpenStack project (tenant) name.
+- ``OS_USER_DOMAIN_NAME`` (optional): The user domain name (default: "Default").
+- ``OS_PROJECT_DOMAIN_NAME`` (optional): The project domain name (default: "Default").
 
-   The MAAS API key for authentication.
-
-OpenStack Configuration
-^^^^^^^^^^^^^^^^^^^^^^^
-
-.. data:: OS_AUTH_URL
-   :annotation: str
-
-   The OpenStack authentication URL (Keystone endpoint).
-
-.. data:: OS_USERNAME
-   :annotation: str
-
-   The OpenStack username for authentication.
-
-.. data:: OS_PASSWORD
-   :annotation: str
-
-   The OpenStack password for authentication.
-
-.. data:: OS_PROJECT_NAME
-   :annotation: str
-
-   The OpenStack project name.
-
-.. data:: OS_USER_DOMAIN_NAME
-   :annotation: str
-
-   The user domain name for OpenStack authentication.
-
-.. data:: OS_PROJECT_DOMAIN_NAME
-   :annotation: str
-
-   The project domain name for OpenStack authentication.
-
+For more details and configuration examples, refer to the "Configuration" section of the documentation.
 
 Logging
 -------
 
-The MAAS CPU Analyzer uses Python's standard logging module. Log messages are sent to stderr by default.
+MAAS CPU Analyzer uses Python's standard logging module. Log messages are sent to stderr by default.
 
-Log Levels
-~~~~~~~~~~
+**Log Levels**
 
-* **INFO**: General information about the analysis process
-* **WARNING**: Non-fatal issues that don't prevent operation
-* **ERROR**: Fatal errors that prevent successful completion
-* **DEBUG**: Detailed debugging information (requires verbose mode)
+- ``INFO``: General information about the analysis process.
+- ``WARNING``: Non-fatal issues that do not prevent operation.
+- ``ERROR``: Fatal errors that prevent successful completion.
+- ``DEBUG``: Detailed debugging information (enabled with verbose mode).
 
-Log Format
-~~~~~~~~~~
+**Log Format**
 
-Log messages follow this format:
+Log messages use the following format:
 
 .. code-block:: text
 
    [LEVEL] message
 
-Example:
+**Example:**
 
 .. code-block:: text
 

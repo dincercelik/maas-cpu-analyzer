@@ -37,9 +37,6 @@ class MAASCPUAnalyzer:
         self.maas_client = MAASClient(verbose)
         self.trait_manager = TraitManager(self.openstack_client, verbose, analyzer=self)
 
-        # Set the custom trait pattern
-        self.openstack_client.set_custom_trait_pattern(CPUUtils._CUSTOM_TRAIT_PATTERN)
-
     def log(self, message: str) -> None:
         """Log message if verbose mode is enabled"""
         if self.verbose:
@@ -81,12 +78,6 @@ class MAASCPUAnalyzer:
     def _get_hypervisors(self) -> List[Dict]:
         """Delegate to OpenStackClient.get_hypervisors"""
         return self.openstack_client.get_hypervisors()
-
-    def check_dependencies(self) -> None:
-        """Check if required Python libraries are available"""
-        # Dependencies are now imported at module level
-        # This method is kept for compatibility but no longer needed
-        pass
 
     def print_machine_table(
         self, machines: List[Dict], zone: str, deployed_only: bool
@@ -222,7 +213,6 @@ class MAASCPUAnalyzer:
             self.clear_openstack_traits()
             return
 
-        self.check_dependencies()
         machines = self.fetch_maas_data()
         self.print_machine_table(machines, zone, deployed_only)
         self.print_cpu_distribution(machines, zone, deployed_only)
